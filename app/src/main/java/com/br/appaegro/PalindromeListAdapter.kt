@@ -9,7 +9,7 @@ import android.widget.TextView
 import com.br.appaegro.model.PalindromeTestItem
 
 class PalindromeListAdapter(private val context: Context,
-                            private val palindromeTestItemList: ArrayList<PalindromeTestItem>) : BaseAdapter() {
+                            private val palindromeTestItemList: List<PalindromeTestItem>) : BaseAdapter() {
 
     private class PalindromeItemViewHolder {
         internal var tvPalindromeTest: TextView? = null
@@ -28,7 +28,7 @@ class PalindromeListAdapter(private val context: Context,
             viewHolder.tvPalindromeTest = view.findViewById(R.id.palindromeTest)
             viewHolder.tvPalindromeResult = view.findViewById(R.id.palindromeResult)
         } else {
-            //no need to call findViewById, can use existing ones from saved view holder
+            // no need to call findViewById, use saved viewholder
             viewHolder = view?.tag as PalindromeItemViewHolder
         }
 

@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">appaegro</string>
+    <string name="app_name">Palindrometer</string>
+    <string name="last_verify">Últimas verificações</string>
+    <string name="verify">Verificar</string>
 </resources>

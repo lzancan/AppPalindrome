@@ -5,9 +5,9 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.ListView
-import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatEditText
+import androidx.lifecycle.Observer
 import androidx.room.Room
 import com.br.appaegro.model.AppDatabase
 import com.br.appaegro.model.PalindromeTestItem
@@ -17,7 +17,6 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var inputText: AppCompatEditText
     lateinit var buttonOk: AppCompatButton
-    lateinit var textResult: TextView
     lateinit var lvPalindromeList: ListView
 
     private lateinit var palindromeTestItemDao: PalindromeTestItemDao
@@ -26,24 +25,49 @@ class MainActivity : AppCompatActivity() {
 
     var palindromeList: ArrayList<PalindromeTestItem> = ArrayList()
 
+    private lateinit var database: AppDatabase
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val database = Room.databaseBuilder(
+        database = Room.databaseBuilder(
             this,
             AppDatabase::class.java,
             "appaegro-database")
             .allowMainThreadQueries()
             .build()
-        palindromeTestItemDao = database.palindromeTestItemDao()
 
-        palindromeList = ArrayList(palindromeTestItemDao.getAllPalindromeItems())
+        palindromeTestItemDao = database.palindromeTestItemDao()
 
         inputText = findViewById(R.id.etInput)
         buttonOk = findViewById(R.id.buttonOk)
         lvPalindromeList = findViewById(R.id.listItems)
 
+        setupTextAndButton()
+
+        setupObserver()
+
+        palindromeListAdapter = PalindromeListAdapter(this, palindromeList.asReversed())
+        lvPalindromeList.adapter = palindromeListAdapter
+    }
+
+    private fun updateView(palindromeTestItemList: List<PalindromeTestItem>?) {
+        palindromeList.clear()
+        if(!palindromeTestItemList.isNullOrEmpty()) {
+            palindromeList.addAll(palindromeTestItemList)
+        }
+        palindromeListAdapter?.notifyDataSetChanged()
+    }
+
+    private fun setupObserver(){
+        palindromeTestItemDao.getAllPalindromeItems().observe(this,
+            Observer<List<PalindromeTestItem>> {
+                updateView(it)
+            })
+    }
+
+    private fun setupTextAndButton(){
         inputText.addTextChangedListener(object: TextWatcher{
             override fun afterTextChanged(s: Editable?) {
                 buttonOk.isEnabled = !s.isNullOrEmpty()
@@ -57,17 +81,15 @@ class MainActivity : AppCompatActivity() {
 
         })
 
-
         buttonOk.setOnClickListener{
             if(inputText.text.toString().isNotEmpty()){
-                val palindromeTestItem = PalindromeTestItem(inputText.text.toString())
-                palindromeTestItemDao.addPalindromeTestItem(palindromeTestItem)
-                palindromeList.add(palindromeTestItem)
-                palindromeListAdapter?.notifyDataSetChanged()
+                palindromeTestItemDao.addPalindromeTestItem(PalindromeTestItem(inputText.text.toString()))
             }
         }
+    }
 
-        palindromeListAdapter = PalindromeListAdapter(this, ArrayList(palindromeList.asReversed()))
-        lvPalindromeList.adapter = palindromeListAdapter
+    override fun onDestroy() {
+        super.onDestroy()
+        database.close()
     }
 }

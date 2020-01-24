@@ -5,9 +5,8 @@ import androidx.room.PrimaryKey
 
 
 @Entity
-class PalindromeTestItem(wordString: String){
+class PalindromeTestItem(var wordString: String){
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0
-    val wordString: String = wordString
-    val isPalindrome: Boolean = wordString.reversed() == wordString
+    var id: Long = 0L
+    var isPalindrome: Boolean = wordString.reversed() == wordString
 }
